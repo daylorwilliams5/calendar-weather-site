@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Calendar Weather</title>
+  <meta name="description" content="A Chrome extension that shows each day's forecast under the date in Google Calendar, and switches cities automatically when you travel.">
+  <link rel="icon" href="icon.png">
+  <meta property="og:title" content="Calendar Weather">
+  <meta property="og:description" content="The forecast, right under every day in Google Calendar.">
+  <meta property="og:image" content="https://daylorwilliams5.github.io/calendar-weather-site/week.png">
+  <style>
+    :root {
+      --bg: #ffffff;
+      --surface: #f4f7fc;
+      --ink: #1b1f24;
+      --muted: #56606b;
+      --faint: #8a939d;
+      --hair: #e3e8ef;
+      --accent: #1a73e8;
+      --accent-ink: #ffffff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121417;
+        --surface: #1a1d21;
+        --ink: #e8eaed;
+        --muted: #a7afb8;
+        --faint: #7b848e;
+        --hair: #2a2f35;
+        --accent: #8ab4f8;
+        --accent-ink: #0b1a33;
+      }
+    }
+    * { box-sizing: border-box; }
+    html { -webkit-text-size-adjust: 100%; }
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+    a { color: var(--accent); }
+    .wrap { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    .text { max-width: 640px; }
+
+    header.hero { padding: 56px 0 32px; }
+    .brand { display: flex; align-items: center; gap: 14px; }
+    .brand img { width: 56px; height: 56px; }
+    h1 { font-size: clamp(2rem, 6vw, 2.8rem); line-height: 1.1; margin: 0; letter-spacing: -0.02em; }
+    .tagline { font-size: clamp(1.2rem, 3.2vw, 1.5rem); line-height: 1.35; margin: 20px 0 0; max-width: 28ch; }
+    .sub { color: var(--muted); margin: 14px 0 0; }
+    .actions { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 20px; margin-top: 24px; }
+    .btn {
+      display: inline-block; padding: 10px 18px; border-radius: 999px; font-weight: 600;
+      background: var(--accent); color: var(--accent-ink); text-decoration: none;
+    }
+    .btn[aria-disabled="true"] { background: var(--surface); color: var(--muted); border: 1px solid var(--hair); cursor: default; }
+    .meta { color: var(--faint); font-size: 0.875rem; }
+
+    figure { margin: 0; }
+    figure img { display: block; width: 100%; height: auto; border-radius: 12px; border: 1px solid var(--hair); background: var(--surface); }
+    figcaption { color: var(--faint); font-size: 0.875rem; margin-top: 8px; }
+
+    section { padding: 48px 0 0; }
+    h2 { font-size: 1.4rem; margin: 0 0 16px; padding-bottom: 10px; border-bottom: 1px solid var(--hair); }
+    .features { list-style: none; padding: 0; margin: 0; display: grid; gap: 1px; background: var(--hair); border: 1px solid var(--hair); border-radius: 12px; overflow: hidden; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .features li { background: var(--bg); padding: 16px 18px; }
+    .features b { display: block; margin-bottom: 4px; }
+    .features span { color: var(--muted); font-size: 0.95rem; }
+
+    ol.steps { padding-left: 1.3rem; margin: 0; }
+    ol.steps li { padding: 4px 0; }
+
+    dl.faq { margin: 0; }
+    dl.faq > div { padding: 14px 0; border-top: 1px solid var(--hair); }
+    dl.faq > div:first-child { border-top: 0; padding-top: 0; }
+    dl.faq dt { font-weight: 600; }
+    dl.faq dd { margin: 4px 0 0; color: var(--muted); }
+    .contact { margin-top: 18px; padding: 14px 18px; background: var(--surface); border-radius: 12px; }
+
+    footer { color: var(--faint); font-size: 0.875rem; padding: 56px 0 40px; }
+  </style>
+</head>
+<body>
+  <header class="hero wrap">
+    <div class="brand">
+      <img src="icon.png" alt="" width="56" height="56">
+      <h1>Calendar Weather</h1>
+    </div>
+    <p class="tagline">The forecast, right under every day in Google Calendar.</p>
+    <p class="sub text">
+      A Chrome extension that puts each day’s weather under the date, where you
+      already plan your week. When an all-day event says you’re traveling, those
+      days show the weather where you’ll be.
+    </p>
+    <div class="actions">
+      <!-- Swap for the Chrome Web Store link once the listing is live. -->
+      <a class="btn" id="install" aria-disabled="true">Coming soon to the Chrome Web Store</a>
+      <span class="meta">Free · no account · no sign-in</span>
+    </div>
+  </header>
+
+  <main class="wrap">
+    <figure>
+      <img src="week.png" width="1280" height="800"
+        alt="A calendar week view with a weather icon, high and low temperature, and place name under each date. Friday and Saturday, covered by an all-day 'Seattle weekend' event, show Seattle's forecast.">
+      <figcaption>Home forecast during the week, Seattle’s on the days of the trip.</figcaption>
+    </figure>
+
+    <section>
+      <h2>What it does</h2>
+      <ul class="features">
+        <li><b>Forecast under every day</b><span>Icon, high and low, and the place in week and day views. Month view gets a compact version next to each date.</span></li>
+        <li><b>Travel-aware</b><span>An all-day event like “Austin weekend” switches those days to Austin’s forecast.</span></li>
+        <li><b>Your actual neighborhood</b><span>Set home to your neighborhood rather than the nearest big city. A few miles can mean several degrees.</span></li>
+        <li><b>Change it in place</b><span>Click the place under any day to pick another, for every day or just that one.</span></li>
+        <li><b>Accurate in the US</b><span>Uses NOAA’s National Blend of Models, the data behind official National Weather Service forecasts.</span></li>
+        <li><b>Fits in</b><span>Follows Calendar’s light and dark themes and picks °F or °C for your region.</span></li>
+      </ul>
+    </section>
+
+    <section>
+      <figure>
+        <img src="picker.png" width="1280" height="800" loading="lazy"
+          alt="Calendar in dark theme with a location picker open under Saturday, offering 'Every day' or 'Only Sat, Oct 10', with a search for 'Capitol Hill' and matching neighborhoods.">
+        <figcaption>Click the place under a day to change it.</figcaption>
+      </figure>
+    </section>
+
+    <section id="setup">
+      <h2>Setup</h2>
+      <ol class="steps text">
+        <li>Install Calendar Weather from the Chrome Web Store.</li>
+        <li>On the settings page that opens, search for your neighborhood or city, or use your current location.</li>
+        <li>Open or reload Google Calendar.</li>
+      </ol>
+    </section>
+
+    <section id="support">
+      <h2>Support</h2>
+      <dl class="faq text">
+        <div>
+          <dt>I don’t see any weather.</dt>
+          <dd>Click the extension’s icon in the Chrome toolbar, set a location, then reload Google Calendar. Weather shows in week, day, and month views.</dd>
+        </div>
+        <div>
+          <dt>The temperature doesn’t match my phone.</dt>
+          <dd>Different weather providers usually differ by a few degrees. Hover a day to see which source it used. If it’s off by much more than that, email the place and date.</dd>
+        </div>
+        <div>
+          <dt>A trip didn’t switch cities.</dt>
+          <dd>Trip detection reads all-day events and needs Google Calendar set to English. It recognizes cities with more than 150,000 people by name; for smaller places, put the city in the event’s Location field. You can also click the place under any day to set it by hand.</dd>
+        </div>
+        <div>
+          <dt>How far ahead does it go?</dt>
+          <dd>About 16 days. Days further out show no weather.</dd>
+        </div>
+      </dl>
+      <p class="contact text">Something else? Email <a href="mailto:support@daylor.ai">support@daylor.ai</a>.</p>
+    </section>
+
+    <section id="privacy">
+      <h2>Privacy</h2>
+      <p class="text">
+        No account, no sign-in, no Google Calendar permissions, no analytics. Your
+        settings stay in your browser. To get weather, the extension sends place
+        coordinates to Open-Meteo and location searches to Photon (OpenStreetMap).
+        To detect trips it reads the titles of all-day events on screen, and only
+        possible city names from them leave your browser.
+      </p>
+      <p class="text"><a href="https://gist.github.com/daylorwilliams5/7ed9cf78fa55bf65e4bac7c6193488be">Read the full privacy policy →</a></p>
+    </section>
+  </main>
+
+  <footer class="wrap">
+    Calendar Weather is not affiliated with or endorsed by Google.
+  </footer>
+</body>
+</html>
